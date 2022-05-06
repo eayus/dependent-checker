@@ -12,8 +12,8 @@ import Data.Functor (($>))
 
 data TypeError where
     CannotInfer :: Expr vars -> TypeError
-    CannotApply :: Expr vars -> Expr globals -> TypeError
-    LamNotPi    :: Expr vars -> Expr globals -> TypeError
+    CannotApply :: Expr vars -> Expr frees -> TypeError
+    LamNotPi    :: Expr vars -> Expr frees -> TypeError
     Mismatch    :: Expr vars -> Expr vars -> TypeError
 
 deriving instance Show TypeError
@@ -24,7 +24,7 @@ deriving instance Show TypeError
 -- named 'ensure'.
 
 
-infer :: Context vars globals -> Expr vars -> Either TypeError (Type globals)
+infer :: Context vars frees -> Expr vars -> Either TypeError (Type frees)
 infer ctx (Var v)      = pure $ llookup v ctx
 infer ctx (App x y)    = inferApp ctx x y
 infer ctx (Let x ty y) = inferLet ctx x ty y
@@ -33,44 +33,44 @@ infer ctx Type         = pure VType
 infer ctx x            = Left $ CannotInfer x
 
 
-inferApp :: Context vars globals -> Expr vars -> Expr vars -> Either TypeError (Type globals)
+inferApp :: Context vars frees -> Expr vars -> Expr vars -> Either TypeError (Type frees)
 inferApp ctx x y = infer ctx x >>= \case
     VPi from to -> do
         ensure ctx y from
         let yv = toValue ctx y
         pure $ force to yv
-    ty -> Left $ CannotApply x (reify (globals ctx) ty)
+    ty -> Left $ CannotApply x (reify (frees ctx) ty)
 
 
-inferLet :: Context vars globals -> Expr vars -> Expr vars -> Expr (S vars) -> Either TypeError (Type globals)
+inferLet :: Context vars frees -> Expr vars -> Expr vars -> Expr (S vars) -> Either TypeError (Type frees)
 inferLet ctx arg ty body = do
     let tyv = toValue ctx ty
     let argv = toValue ctx arg
     ensure ctx arg tyv
-    infer (Local ctx tyv argv) body
+    infer (Bound ctx tyv argv) body
 
 
-ensure :: Context vars globals -> Expr vars -> Type globals -> Either TypeError ()
+ensure :: Context vars frees -> Expr vars -> Type frees -> Either TypeError ()
 ensure ctx (Lam x) ty = ensureLam ctx x ty
 ensure ctx x expected = infer ctx x >>= ensureConvertible ctx expected
 
 
-ensureLam :: Context vars globals -> Expr (S vars) -> Type globals -> Either TypeError ()
-ensureLam ctx body (VPi from to) = ensure (Global ctx from) body (forceFresh (globals ctx) to)
-ensureLam ctx body ty            = Left $ LamNotPi body (reify (globals ctx) ty)
+ensureLam :: Context vars frees -> Expr (S vars) -> Type frees -> Either TypeError ()
+ensureLam ctx body (VPi from to) = ensure (Free ctx from) body (forceFresh (frees ctx) to)
+ensureLam ctx body ty            = Left $ LamNotPi body (reify (frees ctx) ty)
 
 
-ensureConvertible :: Context vars globals -> Type globals -> Type globals -> Either TypeError ()
+ensureConvertible :: Context vars frees -> Type frees -> Type frees -> Either TypeError ()
 ensureConvertible ctx expected actual = do
-    let expected' = reify (globals ctx) expected
-    let actual' = reify (globals ctx) actual
+    let expected' = reify (frees ctx) expected
+    let actual' = reify (frees ctx) actual
     if expected' == actual'
         then pure ()
         else Left $ Mismatch expected' actual'
 
 
-checkPi :: Context vars globals -> Expr vars -> Expr (S vars) -> Either TypeError ()
+checkPi :: Context vars frees -> Expr vars -> Expr (S vars) -> Either TypeError ()
 checkPi ctx from to = do
     ensure ctx from VType
     let fromv = toValue ctx from
-    ensure (Global ctx fromv) to VType
+    ensure (Free ctx fromv) to VType
