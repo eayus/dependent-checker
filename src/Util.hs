@@ -62,6 +62,7 @@ largest (SS n) = FS $ largest n
 complement :: SNat n -> Fin n -> Fin n
 complement (SS n) FZ     = largest n
 complement (SS n) (FS x) = weakenFin $ complement n x
+complement SZ     n      = case n of {}
 
 
 -- Index from the right hand side of the RVect. I.e., the 0th element

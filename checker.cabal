@@ -23,7 +23,10 @@ executable checker
         DataKinds,
         KindSignatures,
         LambdaCase,
-        StandaloneDeriving
+        StandaloneDeriving,
+        EmptyCase,
+        DuplicateRecordFields,
+        OverloadedRecordDot
 
     ghc-options:
         -fwarn-incomplete-patterns

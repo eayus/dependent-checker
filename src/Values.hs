@@ -15,6 +15,9 @@ data Value (vars :: Nat)
     | VType
 
 
+type Type (vars :: Nat) = Value vars
+
+
 -- Environments map one scope to another. They could be interepreted as a
 -- form of explicit substitution. We use a right-extending environment,
 -- but then index from the left to simulate de Bruijn levels.
