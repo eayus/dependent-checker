@@ -1,0 +1,16 @@
+name: dependent-checker
+
+executable:
+  source-dirs: src
+  main: Main
+
+default-extensions:
+- DataKinds
+- GADTs
+- KindSignatures
+- LambdaCase
+- StandaloneDeriving
+
+dependencies:
+- base >= 4.7 && < 5
+- dependent-base
