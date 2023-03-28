@@ -23,6 +23,8 @@ weakenValue (VLam clos)  = VLam $ weakenClosure clos
 weakenValue (VPi x y)    = VPi (weakenValue x) (weakenClosure y)
 weakenValue (VSigma x y) = VSigma (weakenValue x) (weakenClosure y)
 weakenValue (VPair x y)  = VPair (weakenValue x) (weakenValue y)
+weakenValue (VFst x)     = VFst (weakenValue x)
+weakenValue (VSnd x)     = VSnd (weakenValue x)
 weakenValue VType        = VType
 
 

@@ -17,6 +17,8 @@ infer ctx (Let x y)   = inferLet ctx x y
 infer ctx (Pi x y)    = inferPi ctx x y
 infer ctx (Sigma x y) = inferPi ctx x y
 infer ctx (Pair x y)  = Nothing
+infer ctx (Fst x)     = inferFst ctx x
+infer ctx (Snd x)     = inferSnd ctx x
 infer ctx (Ano x t)   = inferAno ctx x t
 infer ctx Type        = Just VType
 
@@ -73,3 +75,15 @@ inferAno ctx x t = do
     let t' = eval (values ctx) t
     check ctx x t'
     Just t'
+
+
+inferFst :: Context vars frees -> Expr vars -> Maybe (Value frees)
+inferFst ctx x = infer ctx x >>= \case
+    VSigma t u -> pure t
+    _ -> Nothing
+    
+
+inferSnd :: Context vars frees -> Expr vars -> Maybe (Value frees)
+inferSnd ctx x = infer ctx x >>= \case
+    VSigma t u -> pure $ force u $ eval (values ctx) (Fst x)
+    _ -> Nothing

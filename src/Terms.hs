@@ -14,6 +14,8 @@ data Expr (vars :: Nat)
     | Pi (Expr vars) (Expr (S vars))
     | Sigma (Expr vars) (Expr (S vars))
     | Pair (Expr vars) (Expr vars)
+    | Fst (Expr vars)
+    | Snd (Expr vars)
     | Ano (Expr vars) (Expr vars)
     | Type
     deriving Eq

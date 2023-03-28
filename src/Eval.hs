@@ -18,6 +18,8 @@ eval env (Let x y)   = eval env (App (Lam y) x)
 eval env (Pi x y)    = VPi (eval env x) (Lazily env y)
 eval env (Sigma x y) = VSigma (eval env x) (Lazily env y)
 eval env (Pair x y)  = VPair (eval env x) (eval env y)
+eval env (Fst x)     = projectFst (eval env x)
+eval env (Snd x)     = projectSnd (eval env x)
 eval env (Ano x _)   = eval env x
 eval env Type        = VType
 
@@ -27,6 +29,16 @@ eval env Type        = VType
 apply :: Value vars -> Value vars -> Value vars
 apply (VLam clos) arg = force clos arg
 apply x           y   = VApp x y
+
+
+projectFst :: Value vars -> Value vars
+projectFst (VPair x y) = x
+projectFst e           = VFst e
+
+
+projectSnd :: Value vars -> Value vars
+projectSnd (VPair x y) = y
+projectSnd e           = VSnd e
 
 
 -- When the value of a closure is required, we can force it by giving
@@ -48,6 +60,9 @@ reify vars (VApp x y)   = App (reify vars x) (reify vars y)
 reify vars (VLam clos)  = Lam (reifyClosure vars clos)
 reify vars (VPi x y)    = Pi (reify vars x) (reifyClosure vars y)
 reify vars (VSigma x y) = Sigma (reify vars x) (reifyClosure vars y)
+reify vars (VPair x y)  = Pair (reify vars x) (reify vars y)
+reify vars (VFst x)     = Fst (reify vars x)
+reify vars (VSnd x)     = Snd (reify vars x)
 reify vars VType        = Type
 
 reifyClosure :: SNat vars -> Closure vars -> Expr (S vars)
