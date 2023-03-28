@@ -12,10 +12,12 @@ import Data.Vect (Vect(Nil))
 
 deriving instance Show (Fin vars)
 deriving instance Show (Expr vars)
+deriving instance Show Const
 
 
 prog :: Expr Z
-prog = Snd (Ano (Pair Type $ Pi Type Type) (Sigma Type (Var FZ)))
+prog = Const (IntLit 3)
+--prog = Snd (Ano (Pair Type $ Pi Type Type) (Sigma Type (Var FZ)))
 {-
 prog = Let (Ano (Lam $ Var FZ) (Pi Type Type)) $
        Let (Ano (Lam $ Var $ FS FZ) (Pi (App (Var FZ) Type) (App (Var FZ) Type)))

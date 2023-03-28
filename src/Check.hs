@@ -21,6 +21,7 @@ infer ctx (Fst x)     = inferFst ctx x
 infer ctx (Snd x)     = inferSnd ctx x
 infer ctx (Ano x t)   = inferAno ctx x t
 infer ctx Type        = Just VType
+infer ctx (Const c)   = Just $ inferConst c
 
 
 check :: Context vars frees -> Expr vars -> Value frees -> Maybe ()
@@ -87,3 +88,8 @@ inferSnd :: Context vars frees -> Expr vars -> Maybe (Value frees)
 inferSnd ctx x = infer ctx x >>= \case
     VSigma t u -> pure $ force u $ eval (values ctx) (Fst x)
     _ -> Nothing
+
+
+inferConst :: Const -> Value vars
+inferConst Int        = VType
+inferConst (IntLit _) = VConst Int

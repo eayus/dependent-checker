@@ -18,4 +18,11 @@ data Expr (vars :: Nat)
     | Snd (Expr vars)
     | Ano (Expr vars) (Expr vars)
     | Type
+    | Const Const
+    deriving Eq
+
+
+data Const
+    = Int
+    | IntLit Integer
     deriving Eq

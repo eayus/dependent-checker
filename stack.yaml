@@ -5,3 +5,5 @@ packages:
 extra-deps:
 - github: eayus/dependent-base
   commit: c4ece13a7c29c5603dd096aab3afef27c5c93f0e
+
+system-ghc: true

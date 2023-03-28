@@ -26,6 +26,7 @@ weakenValue (VPair x y)  = VPair (weakenValue x) (weakenValue y)
 weakenValue (VFst x)     = VFst (weakenValue x)
 weakenValue (VSnd x)     = VSnd (weakenValue x)
 weakenValue VType        = VType
+weakenValue (VConst c)   = VConst c
 
 
 weakenEnv :: Env from to -> Env from (S to)

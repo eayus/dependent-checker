@@ -19,6 +19,7 @@ data Value (vars :: Nat)
     | VFst (Value vars)
     | VSnd (Value vars)
     | VType
+    | VConst Const
 
 
 -- Environments map one scope to another. They could be interepreted as a

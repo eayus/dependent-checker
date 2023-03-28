@@ -22,6 +22,7 @@ eval env (Fst x)     = projectFst (eval env x)
 eval env (Snd x)     = projectSnd (eval env x)
 eval env (Ano x _)   = eval env x
 eval env Type        = VType
+eval env (Const c)   = VConst c
 
 
 -- Try to apply closures if possible..
@@ -64,6 +65,7 @@ reify vars (VPair x y)  = Pair (reify vars x) (reify vars y)
 reify vars (VFst x)     = Fst (reify vars x)
 reify vars (VSnd x)     = Snd (reify vars x)
 reify vars VType        = Type
+reify vars (VConst c)   = Const c
 
 reifyClosure :: SNat vars -> Closure vars -> Expr (S vars)
 reifyClosure vars clos = reify (SS vars) (forceFresh vars clos)
