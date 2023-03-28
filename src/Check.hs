@@ -10,13 +10,14 @@ import Control.Monad (unless)
 
 
 infer :: Context vars frees -> Expr vars -> Maybe (Value frees)
-infer ctx (Var lvl) = Just (level lvl (types ctx))
-infer ctx (App x y) = inferApp ctx x y
-infer ctx (Lam x)   = Nothing
-infer ctx (Let x y) = inferLet ctx x y
-infer ctx (Pi x y)  = inferPi ctx x y
-infer ctx (Ano x t) = inferAno ctx x t
-infer ctx Type      = Just VType
+infer ctx (Var lvl)   = Just (level lvl (types ctx))
+infer ctx (App x y)   = inferApp ctx x y
+infer ctx (Lam x)     = Nothing
+infer ctx (Let x y)   = inferLet ctx x y
+infer ctx (Pi x y)    = inferPi ctx x y
+infer ctx (Sigma x y) = inferPi ctx x y
+infer ctx (Ano x t)   = inferAno ctx x t
+infer ctx Type        = Just VType
 
 
 check :: Context vars frees -> Expr vars -> Value frees -> Maybe ()

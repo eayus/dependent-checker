@@ -12,6 +12,7 @@ data Expr (vars :: Nat)
     | Lam (Expr (S vars))
     | Let (Expr vars) (Expr (S vars))
     | Pi (Expr vars) (Expr (S vars))
+    | Sigma (Expr vars) (Expr (S vars))
     | Ano (Expr vars) (Expr vars)
     | Type
     deriving Eq
