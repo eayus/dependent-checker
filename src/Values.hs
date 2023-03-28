@@ -15,6 +15,7 @@ data Value (vars :: Nat)
     | VLam (Closure vars)
     | VPi (Value vars) (Closure vars)
     | VSigma (Value vars) (Closure vars)
+    | VPair (Value vars) (Value vars)
     | VType
 
 

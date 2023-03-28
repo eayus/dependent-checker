@@ -16,17 +16,31 @@ infer ctx (Lam x)     = Nothing
 infer ctx (Let x y)   = inferLet ctx x y
 infer ctx (Pi x y)    = inferPi ctx x y
 infer ctx (Sigma x y) = inferPi ctx x y
+infer ctx (Pair x y)  = Nothing
 infer ctx (Ano x t)   = inferAno ctx x t
 infer ctx Type        = Just VType
 
 
 check :: Context vars frees -> Expr vars -> Value frees -> Maybe ()
-check ctx (Lam x) (VPi t u) = check (extendFree t ctx) x (forceFresh (frees ctx) u)
+check ctx (Lam x)    exp = checkLam ctx x exp
+check ctx (Pair x y) exp = checkPair ctx x y exp
 check ctx expr    expected  = do
     actual <- infer ctx expr
     let expected' = reify (frees ctx) expected
     let actual'   = reify (frees ctx) actual
     unless (expected' == actual') Nothing
+
+
+checkLam :: Context vars frees -> Expr (S vars) -> Value frees -> Maybe ()
+checkLam ctx x (VPi t u) = check (extendFree t ctx) x (forceFresh (frees ctx) u)
+checkLam ctx x _ = Nothing
+
+
+checkPair :: Context vars frees -> Expr vars -> Expr vars -> Value frees -> Maybe ()
+checkPair ctx x y (VSigma t u) = do
+    check ctx x t
+    check ctx y (force u (eval (values ctx) x))
+checkPair ctx x y _ = Nothing
 
 
 inferApp :: Context vars frees -> Expr vars -> Expr vars -> Maybe (Value frees)

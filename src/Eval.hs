@@ -17,6 +17,7 @@ eval env (App x y)   = apply (eval env x) (eval env y)
 eval env (Let x y)   = eval env (App (Lam y) x)
 eval env (Pi x y)    = VPi (eval env x) (Lazily env y)
 eval env (Sigma x y) = VSigma (eval env x) (Lazily env y)
+eval env (Pair x y)  = VPair (eval env x) (eval env y)
 eval env (Ano x _)   = eval env x
 eval env Type        = VType
 
