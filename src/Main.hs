@@ -12,6 +12,7 @@ import Data.Vect (Vect(Nil))
 
 deriving instance Show (Fin vars)
 deriving instance Show (Expr vars)
+deriving instance Show Stage
 deriving instance Show Const
 
 

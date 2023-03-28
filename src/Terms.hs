@@ -11,7 +11,7 @@ data Expr (vars :: Nat)
     | App (Expr vars) (Expr vars)
     | Lam (Expr (S vars))
     | Let (Expr vars) (Expr (S vars))
-    | Pi (Expr vars) (Expr (S vars))
+    | Pi (Expr vars) Stage (Expr (S vars)) Stage
     | Sigma (Expr vars) (Expr (S vars))
     | Pair (Expr vars) (Expr vars)
     | Fst (Expr vars)
@@ -26,3 +26,14 @@ data Const
     = Int
     | IntLit Integer
     deriving Eq
+
+
+data Stage
+    = Constant
+    | Runtime
+    deriving Eq
+
+
+instance Semigroup Stage where
+    Constant <> Constant = Constant
+    _ <> _ = Runtime

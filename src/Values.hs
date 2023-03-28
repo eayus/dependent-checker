@@ -13,7 +13,7 @@ data Value (vars :: Nat)
     = VVar (Fin vars)
     | VApp (Value vars) (Value vars)
     | VLam (Closure vars)
-    | VPi (Value vars) (Closure vars)
+    | VPi (Value vars) Stage (Closure vars) Stage
     | VSigma (Value vars) (Closure vars)
     | VPair (Value vars) (Value vars)
     | VFst (Value vars)
