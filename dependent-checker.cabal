@@ -16,6 +16,7 @@ executable dependent-checker
       Check
       Context
       Eval
+      Parse
       Terms
       Values
       Weaken
@@ -32,4 +33,7 @@ executable dependent-checker
   build-depends:
       base >=4.7 && <5
     , dependent-base
+    , megaparsec
+    , mmorph >=1.2.0
+    , mtl
   default-language: Haskell2010

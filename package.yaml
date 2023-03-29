@@ -14,3 +14,6 @@ default-extensions:
 dependencies:
 - base >= 4.7 && < 5
 - dependent-base
+- megaparsec
+- mtl
+- mmorph >= 1.2.0
