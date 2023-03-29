@@ -101,11 +101,21 @@ parseLet :: Parser vars (Expr vars)
 parseLet = do
     symbol "let"
     name <- parseName
+    an <- M.optional $ do
+        symbol ":"
+        st <- parseStage
+        ty <- parseExpr
+        pure (ty, st)
     symbol "="
     arg <- parseExpr
     symbol ";"
     body <- extend name parseExpr
-    pure $ Let arg body
+    pure $ Let an arg body
+
+parseRun :: Parser vars (Expr vars)
+parseRun = do
+    symbol "^"
+    Run <$> parseExpr
 
 parseConstant :: Parser vars (Expr vars)
 parseConstant = M.choice $ map (\(s, e) -> M.try (symbol s $> e)) constants
@@ -121,7 +131,7 @@ parseLit = Const . IntLit <$> lexeme L.decimal
 
 parseExpr' :: Parser vars (Expr vars)
 parseExpr' = M.choice $ map M.try
-    [ parseSubExpr, parseLit, parseConstant, parseLam, parsePi, parseLet, parseVar]
+    [ parseSubExpr, parseLit, parseConstant, parseLam, parsePi, parseLet, parseVar, parseRun ]
 
 parseExpr :: Parser vars (Expr vars)
 parseExpr = foldl1 App <$> M.some parseExpr'

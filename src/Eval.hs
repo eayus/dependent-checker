@@ -14,7 +14,7 @@ eval :: Env from to -> Expr from -> Value to
 eval env (Var v)      = level v env
 eval env (Lam x)      = VLam $ Lazily env x
 eval env (App x y)    = apply (eval env x) (eval env y)
-eval env (Let x y)    = eval env (App (Lam y) x)
+eval env (Let _ x y)  = eval env (App (Lam y) x)
 eval env (Pi x n y m) = VPi (eval env x) n (Lazily env y) m
 eval env (Sigma x y)  = VSigma (eval env x) (Lazily env y)
 eval env (Pair x y)   = VPair (eval env x) (eval env y)
@@ -23,6 +23,7 @@ eval env (Snd x)      = projectSnd (eval env x)
 eval env (Ano x _)    = eval env x
 eval env Type         = VType
 eval env (Const c)    = VConst c
+eval env (Run x)      = VRun (eval env x)
 
 
 -- Try to apply closures if possible..
@@ -66,6 +67,7 @@ reify vars (VFst x)      = Fst (reify vars x)
 reify vars (VSnd x)      = Snd (reify vars x)
 reify vars VType         = Type
 reify vars (VConst c)    = Const c
+reify vars (VRun x)      = Run (reify vars x)
 
 
 reifyClosure :: SNat vars -> Closure vars -> Expr (S vars)

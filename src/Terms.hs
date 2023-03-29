@@ -10,7 +10,7 @@ data Expr (vars :: Nat)
     = Var (Fin vars) 
     | App (Expr vars) (Expr vars)
     | Lam (Expr (S vars))
-    | Let (Expr vars) (Expr (S vars))
+    | Let (Maybe (Expr vars, Stage)) (Expr vars) (Expr (S vars))
     | Pi (Expr vars) Stage (Expr (S vars)) Stage
     | Sigma (Expr vars) (Expr (S vars))
     | Pair (Expr vars) (Expr vars)
@@ -19,6 +19,7 @@ data Expr (vars :: Nat)
     | Ano (Expr vars) (Expr vars)
     | Type
     | Const Const
+    | Run (Expr vars)
     deriving (Eq, Show)
 
 
@@ -40,3 +41,7 @@ data Stage
 instance Semigroup Stage where
     Constant <> Constant = Constant
     _ <> _ = Runtime
+
+
+nextStage :: Stage -> Stage
+nextStage _  = Runtime

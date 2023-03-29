@@ -1,1 +1,4 @@
-(a : const type) -> const (x : rt a) -> rt a
+let id : const (a : const type) -> const (x : rt a) -> rt a
+    = fn a => fn x => x;
+
+id int ^3

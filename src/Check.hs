@@ -13,7 +13,7 @@ infer :: Context vars frees -> Expr vars -> Either String (Value frees, Stage)
 infer ctx (Var lvl)    = pure (level lvl (types ctx), level lvl (stages ctx))
 infer ctx (App x y)    = inferApp ctx x y
 infer ctx (Lam x)      = Left "Can't infer lam"
-infer ctx (Let x y)    = inferLet ctx x y
+infer ctx (Let t x y)  = inferLet ctx t x y
 infer ctx (Pi x n y m) = inferPi ctx x y
 infer ctx (Sigma x y)  = inferPi ctx x y
 infer ctx (Pair x y)   = Left "Can't infer pair"
@@ -22,6 +22,7 @@ infer ctx (Snd x)      = inferSnd ctx x
 infer ctx (Ano x t)    = inferAno ctx x t
 infer ctx Type         = pure (VType, Constant)
 infer ctx (Const c)    = pure (inferConst c, Constant)
+infer ctx (Run x)      = inferRun ctx x
 
 
 check :: Context vars frees -> Expr vars -> Value frees -> Maybe Stage -> Either String Stage
@@ -63,11 +64,17 @@ inferApp ctx lhs rhs = infer ctx lhs >>= \case
     _ -> Left "Cannot apply term which does not have pi type"
 
 
-inferLet :: Context vars frees -> Expr vars -> Expr (S vars) -> Either String (Value frees, Stage)
-inferLet ctx arg body = do
+inferLet :: Context vars frees -> Maybe (Expr vars, Stage) -> Expr vars -> Expr (S vars) -> Either String (Value frees, Stage)
+inferLet ctx Nothing arg body = do
     (argTy, argStage) <- infer ctx arg
     let arg' = eval (values ctx) arg
     infer (extendBound argTy arg' argStage ctx) body
+inferLet ctx (Just (t, n)) arg body = do
+    check ctx t VType Nothing
+    let t' = eval (values ctx) t
+    check ctx arg t' (Just n)
+    let arg' = eval (values ctx) arg
+    infer (extendBound t' arg' n ctx) body
 
 
 inferPi :: Context vars frees -> Expr vars -> Expr (S vars) -> Either String (Value frees, Stage)
@@ -96,6 +103,12 @@ inferSnd :: Context vars frees -> Expr vars -> Either String (Value frees, Stage
 inferSnd ctx x = infer ctx x >>= \case
     (VSigma t u, n) -> pure (force u $ eval (values ctx) (Fst x), n)
     _ -> Left "Cannot project term not of sigma type"
+
+
+inferRun :: Context vars frees -> Expr vars -> Either String (Value frees, Stage)
+inferRun ctx x = do
+    (t, n) <- infer ctx x
+    pure (t, nextStage n)
 
 
 inferConst :: Const -> Value vars
