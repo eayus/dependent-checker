@@ -29,6 +29,8 @@ weakenValue VType         = VType
 weakenValue (VConst c)    = VConst c
 weakenValue (VRun x)      = VRun (weakenValue x)
 weakenValue (VIf b t f)   = VIf (weakenValue b) (weakenValue t) (weakenValue f) 
+weakenValue (VAdd x y)    = VAdd (weakenValue x) (weakenValue y)
+weakenValue (VSub x y)    = VSub (weakenValue x) (weakenValue y)
 
 
 weakenEnv :: Env from to -> Env from (S to)

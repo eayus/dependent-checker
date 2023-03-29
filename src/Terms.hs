@@ -21,6 +21,8 @@ data Expr (vars :: Nat)
     | Const Const
     | Run (Expr vars)
     | If (Expr vars) (Expr vars) (Expr vars)
+    | Add (Expr vars) (Expr vars)
+    | Sub (Expr vars) (Expr vars)
     deriving (Eq, Show)
 
 

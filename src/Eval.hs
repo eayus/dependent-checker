@@ -25,6 +25,8 @@ eval env Type         = VType
 eval env (Const c)    = VConst c
 eval env (Run x)      = VRun (eval env x)
 eval env (If b t f)   = doIf (eval env b) (eval env t) (eval env f)
+eval env (Add x y)    = doAdd (eval env x) (eval env y)
+eval env (Sub x y)    = doSub (eval env x) (eval env y)
 
 
 -- Try to apply closures if possible..
@@ -47,6 +49,17 @@ projectSnd e           = VSnd e
 doIf :: Value vars -> Value vars -> Value vars -> Value vars
 doIf (VConst (IntLit n)) t f = if n > 0 then t else f
 doIf b t f = VIf b t f
+
+
+doAdd :: Value vars -> Value vars -> Value vars
+doAdd (VConst (IntLit n)) (VConst (IntLit m)) = VConst (IntLit (n + m))
+doAdd n m = VAdd n m
+
+
+doSub :: Value vars -> Value vars -> Value vars
+doSub (VConst (IntLit n)) (VConst (IntLit m)) = VConst (IntLit (n - m))
+doSub n m = VSub n m
+
 
 -- When the value of a closure is required, we can force it by giving
 -- the required argument.
@@ -74,6 +87,8 @@ reify vars VType         = Type
 reify vars (VConst c)    = Const c
 reify vars (VRun x)      = Run (reify vars x)
 reify vars (VIf b t f)   = If (reify vars b) (reify vars t) (reify vars f)
+reify vars (VAdd x y)    = Add (reify vars x) (reify vars y)
+reify vars (VSub x y)    = Sub (reify vars x) (reify vars y)
 
 
 reifyClosure :: SNat vars -> Closure vars -> Expr (S vars)

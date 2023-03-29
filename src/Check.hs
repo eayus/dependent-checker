@@ -24,6 +24,8 @@ infer ctx Type         = pure (VType, Constant)
 infer ctx (Const c)    = pure (inferConst c, Constant)
 infer ctx (Run x)      = inferRun ctx x
 infer ctx (If b t f)   = inferIf ctx b t f
+infer ctx (Add x y)    = inferAddSub ctx x y
+infer ctx (Sub x y)    = inferAddSub ctx x y
 
 
 check :: Context vars frees -> Expr vars -> Value frees -> Maybe Stage -> Either String Stage
@@ -118,6 +120,13 @@ inferIf ctx b t f = do
     check ctx f t (Just n)
     check ctx b (VConst Int) (Just n)
     pure (t, n)
+
+
+inferAddSub :: Context vars frees -> Expr vars -> Expr vars -> Either String (Value frees, Stage)
+inferAddSub ctx x y = do
+    n <- check ctx x (VConst Int) Nothing
+    check ctx y (VConst Int) (Just n)
+    pure (VConst Int, n)
 
 
 inferConst :: Const -> Value vars

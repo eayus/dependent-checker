@@ -139,9 +139,15 @@ constants =
 parseLit :: Parser vars (Expr vars)
 parseLit = Const . IntLit <$> lexeme L.decimal
 
-parseExpr' :: Parser vars (Expr vars)
-parseExpr' = M.choice $ map M.try
+parseExpr''' :: Parser vars (Expr vars)
+parseExpr''' = M.choice $ map M.try
     [ parseSubExpr, parseLit, parseConstant, parseLam, parsePi, parseLet, parseVar, parseRun, parseIf ]
 
+parseExpr'' :: Parser vars (Expr vars)
+parseExpr'' = foldl1 App <$> M.some parseExpr'''
+
+parseExpr' :: Parser vars (Expr vars)
+parseExpr' = foldr1 Sub <$> M.sepBy1 parseExpr'' (symbol "-")
+
 parseExpr :: Parser vars (Expr vars)
-parseExpr = foldl1 App <$> M.some parseExpr'
+parseExpr = foldr1 Add <$> M.sepBy1 parseExpr' (symbol "+")
