@@ -1,0 +1,1 @@
+(a : const type) -> const (x : rt a) -> rt a

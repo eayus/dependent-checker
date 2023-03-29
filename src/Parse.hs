@@ -11,10 +11,12 @@ import Control.Monad (void)
 import Control.Applicative ((<|>))
 import Data.Functor (($>))
 import Control.Monad.Reader
-import Data.Vect
+import Data.Vect hiding ((++))
 import Data.Fin
 import Data.Nat
 import Control.Monad.Morph
+
+deriving instance Show a => Show (Vect vars a)
 
 
 findIndex :: Eq a => a -> Vect len a -> Maybe (Fin len)
@@ -48,6 +50,9 @@ symbol :: String -> Parser vars ()
 symbol = void . L.symbol sc
 
 
+parseStage :: Parser vars Stage
+parseStage = lexeme $ M.choice [ M.string "const" $> Constant, M.string "rt" $> Runtime ]
+
 
 parseName :: Parser vars Name
 parseName = lexeme $ do
@@ -69,7 +74,7 @@ parseVar = do
     scope <- ask
     case findIndex name scope of
         Just i -> pure (Var i)
-        Nothing -> fail "Out of scope name"
+        Nothing -> fail $ "Out of scope name " ++ show name ++ " in " ++ show scope
 
 parseLam :: Parser vars (Expr vars)
 parseLam = do
@@ -84,11 +89,13 @@ parsePi = do
     symbol "("
     name <- parseName
     symbol ":"
+    n <- parseStage
     from <- parseExpr
     symbol ")"
     symbol "->"
+    m <- parseStage
     to <- extend name parseExpr
-    pure $ Pi from Constant to Constant
+    pure $ Pi from n to m
 
 parseLet :: Parser vars (Expr vars)
 parseLet = do

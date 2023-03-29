@@ -8,6 +8,9 @@ import Eval
 import Terms
 import Values
 import Data.Vect (Vect(Nil))
+import Text.Megaparsec
+import Parse (parseExpr)
+import Control.Monad.Reader
 
 
 deriving instance Show (Fin vars)
@@ -16,18 +19,15 @@ deriving instance Show Stage
 deriving instance Show Const
 
 
-prog :: Expr Z
-prog = Const (IntLit 3)
---prog = Snd (Ano (Pair Type $ Pi Type Type) (Sigma Type (Var FZ)))
-{-
-prog = Let (Ano (Lam $ Var FZ) (Pi Type Type)) $
-       Let (Ano (Lam $ Var $ FS FZ) (Pi (App (Var FZ) Type) (App (Var FZ) Type)))
-           (Var $ FS FZ)
-           -}
-
-
 main :: IO ()
 main = do
-    case infer initial prog of
-        Nothing -> putStrLn "Type error" 
-        Just (ty, n) -> putStrLn $ show (norm SZ Nil prog) ++ " : " ++ show (reify SZ ty) ++ " @ " ++ show n
+    let fname = "examples/test.dc"
+    contents <- readFile fname
+
+    case runParser (runReaderT parseExpr Nil) fname contents of
+        Left err -> putStrLn $ errorBundlePretty err
+        Right expr -> do
+
+            case infer initial expr of
+                Nothing -> putStrLn "Type error" 
+                Just (ty, n) -> putStrLn $ show (norm SZ Nil expr) ++ " : " ++ show (reify SZ ty) ++ " @ " ++ show n
