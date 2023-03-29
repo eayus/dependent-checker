@@ -30,4 +30,4 @@ main :: IO ()
 main = do
     case infer initial prog of
         Nothing -> putStrLn "Type error" 
-        Just ty -> putStrLn $ show (norm SZ Nil prog) ++ " : " ++ show (reify SZ ty)
+        Just (ty, n) -> putStrLn $ show (norm SZ Nil prog) ++ " : " ++ show (reify SZ ty) ++ " @ " ++ show n

@@ -21,12 +21,12 @@ infer ctx (Fst x)      = inferFst ctx x
 infer ctx (Snd x)      = inferSnd ctx x
 infer ctx (Ano x t)    = inferAno ctx x t
 infer ctx Type         = Just (VType, Constant)
-infer ctx (Const c)    = Just $ inferConst c
+infer ctx (Const c)    = Just (inferConst c, Constant)
 
 
 check :: Context vars frees -> Expr vars -> Value frees -> Maybe Stage -> Maybe Stage
-check ctx (Lam x)    exp n = checkLam ctx x exp
-check ctx (Pair x y) exp n = checkPair ctx x y exp
+check ctx (Lam x)    exp n = checkLam ctx x exp n
+check ctx (Pair x y) exp n = checkPair ctx x y exp n
 check ctx expr    expected  n = do
     (actual, m) <- infer ctx expr
     let expected' = reify (frees ctx) expected
@@ -39,16 +39,19 @@ check ctx expr    expected  n = do
 
 
 
-checkLam :: Context vars frees -> Expr (S vars) -> Value frees -> Maybe ()
-checkLam ctx x (VPi t n u m) = check (extendFree t n ctx) x (forceFresh (frees ctx) u)
-checkLam ctx x _ = Nothing
+checkLam :: Context vars frees -> Expr (S vars) -> Value frees -> Maybe Stage -> Maybe Stage
+checkLam ctx x (VPi t n u m) l = do
+    check (extendFree t n ctx) x (forceFresh (frees ctx) u) (Just m)
+    pure Constant
+checkLam ctx x _ l = Nothing
 
 
-checkPair :: Context vars frees -> Expr vars -> Expr vars -> Value frees -> Maybe ()
-checkPair ctx x y (VSigma t u) = do
-    check ctx x t
-    check ctx y (force u (eval (values ctx) x))
-checkPair ctx x y _ = Nothing
+checkPair :: Context vars frees -> Expr vars -> Expr vars -> Value frees -> Maybe Stage -> Maybe Stage
+checkPair ctx x y (VSigma t u) l = do
+    n <- check ctx x t l
+    m <- check ctx y (force u (eval (values ctx) x)) l
+    pure (n <> m)
+checkPair ctx x y _ l = Nothing
 
 
 inferApp :: Context vars frees -> Expr vars -> Expr vars -> Maybe (Value frees, Stage)
@@ -83,15 +86,15 @@ inferAno ctx x t = do
     Just (t', n)
 
 
-inferFst :: Context vars frees -> Expr vars -> Maybe (Value frees)
+inferFst :: Context vars frees -> Expr vars -> Maybe (Value frees, Stage)
 inferFst ctx x = infer ctx x >>= \case
-    VSigma t u -> pure t
+    (VSigma t u, n) -> pure (t, n)
     _ -> Nothing
     
 
-inferSnd :: Context vars frees -> Expr vars -> Maybe (Value frees)
+inferSnd :: Context vars frees -> Expr vars -> Maybe (Value frees, Stage)
 inferSnd ctx x = infer ctx x >>= \case
-    VSigma t u -> pure $ force u $ eval (values ctx) (Fst x)
+    (VSigma t u, n) -> pure (force u $ eval (values ctx) (Fst x), n)
     _ -> Nothing
 
 
