@@ -72,7 +72,7 @@ parseVar :: Parser vars (Expr vars)
 parseVar = do
     name <- parseName
     scope <- ask
-    case findIndex name scope of
+    case findLevel name scope of
         Just i -> pure (Var i)
         Nothing -> fail $ "Out of scope name " ++ show name ++ " in " ++ show scope
 

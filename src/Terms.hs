@@ -19,19 +19,22 @@ data Expr (vars :: Nat)
     | Ano (Expr vars) (Expr vars)
     | Type
     | Const Const
-    deriving Eq
+    deriving (Eq, Show)
+
+
+deriving instance Show (Fin vars)
 
 
 data Const
     = Int
     | IntLit Integer
-    deriving Eq
+    deriving (Eq, Show)
 
 
 data Stage
     = Constant
     | Runtime
-    deriving Eq
+    deriving (Eq, Show)
 
 
 instance Semigroup Stage where
