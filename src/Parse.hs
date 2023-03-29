@@ -117,6 +117,16 @@ parseRun = do
     symbol "^"
     Run <$> parseExpr
 
+parseIf :: Parser vars (Expr vars)
+parseIf = do
+    symbol "if"
+    b <- parseExpr
+    symbol "then"
+    t <- parseExpr
+    symbol "else"
+    f <- parseExpr
+    pure $ If b t f
+
 parseConstant :: Parser vars (Expr vars)
 parseConstant = M.choice $ map (\(s, e) -> M.try (symbol s $> e)) constants
 
@@ -131,7 +141,7 @@ parseLit = Const . IntLit <$> lexeme L.decimal
 
 parseExpr' :: Parser vars (Expr vars)
 parseExpr' = M.choice $ map M.try
-    [ parseSubExpr, parseLit, parseConstant, parseLam, parsePi, parseLet, parseVar, parseRun ]
+    [ parseSubExpr, parseLit, parseConstant, parseLam, parsePi, parseLet, parseVar, parseRun, parseIf ]
 
 parseExpr :: Parser vars (Expr vars)
 parseExpr = foldl1 App <$> M.some parseExpr'

@@ -20,6 +20,7 @@ data Expr (vars :: Nat)
     | Type
     | Const Const
     | Run (Expr vars)
+    | If (Expr vars) (Expr vars) (Expr vars)
     deriving (Eq, Show)
 
 

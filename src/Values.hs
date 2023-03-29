@@ -21,6 +21,7 @@ data Value (vars :: Nat)
     | VType
     | VConst Const
     | VRun (Value vars)
+    | VIf (Value vars) (Value vars) (Value vars)
 
 
 -- Environments map one scope to another. They could be interepreted as a

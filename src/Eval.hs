@@ -24,6 +24,7 @@ eval env (Ano x _)    = eval env x
 eval env Type         = VType
 eval env (Const c)    = VConst c
 eval env (Run x)      = VRun (eval env x)
+eval env (If b t f)   = doIf (eval env b) (eval env t) (eval env f)
 
 
 -- Try to apply closures if possible..
@@ -42,6 +43,10 @@ projectSnd :: Value vars -> Value vars
 projectSnd (VPair x y) = y
 projectSnd e           = VSnd e
 
+
+doIf :: Value vars -> Value vars -> Value vars -> Value vars
+doIf (VConst (IntLit n)) t f = if n > 0 then t else f
+doIf b t f = VIf b t f
 
 -- When the value of a closure is required, we can force it by giving
 -- the required argument.
@@ -68,6 +73,7 @@ reify vars (VSnd x)      = Snd (reify vars x)
 reify vars VType         = Type
 reify vars (VConst c)    = Const c
 reify vars (VRun x)      = Run (reify vars x)
+reify vars (VIf b t f)   = If (reify vars b) (reify vars t) (reify vars f)
 
 
 reifyClosure :: SNat vars -> Closure vars -> Expr (S vars)

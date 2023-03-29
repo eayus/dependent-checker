@@ -23,6 +23,7 @@ infer ctx (Ano x t)    = inferAno ctx x t
 infer ctx Type         = pure (VType, Constant)
 infer ctx (Const c)    = pure (inferConst c, Constant)
 infer ctx (Run x)      = inferRun ctx x
+infer ctx (If b t f)   = inferIf ctx b t f
 
 
 check :: Context vars frees -> Expr vars -> Value frees -> Maybe Stage -> Either String Stage
@@ -109,6 +110,14 @@ inferRun :: Context vars frees -> Expr vars -> Either String (Value frees, Stage
 inferRun ctx x = do
     (t, n) <- infer ctx x
     pure (t, nextStage n)
+
+
+inferIf :: Context vars frees -> Expr vars -> Expr vars -> Expr vars -> Either String (Value frees, Stage)
+inferIf ctx b t f = do
+    (t, n) <- infer ctx t
+    check ctx f t (Just n)
+    check ctx b (VConst Int) (Just n)
+    pure (t, n)
 
 
 inferConst :: Const -> Value vars
