@@ -1,4 +1,4 @@
-6 - 2 + 3
+(n : [int]) -> [int]
 
 -- if 0 then 2 else 1
 

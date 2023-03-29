@@ -54,6 +54,10 @@ parseStage :: Parser vars Stage
 parseStage = lexeme $ M.choice [ M.string "const" $> Constant, M.string "rt" $> Runtime ]
 
 
+parseStagedExpr :: Parser vars (Expr vars, Stage)
+parseStagedExpr = M.choice [ (, Runtime) <$> parseExpr, (, Constant) <$> M.between (symbol "[") (symbol "]") parseExpr]
+
+
 parseName :: Parser vars Name
 parseName = lexeme $ do
     c <- M.letterChar
@@ -89,12 +93,10 @@ parsePi = do
     symbol "("
     name <- parseName
     symbol ":"
-    n <- parseStage
-    from <- parseExpr
+    (from, n) <- parseStagedExpr
     symbol ")"
     symbol "->"
-    m <- parseStage
-    to <- extend name parseExpr
+    (to, m) <- extend name parseStagedExpr
     pure $ Pi from n to m
 
 parseLet :: Parser vars (Expr vars)
