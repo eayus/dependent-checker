@@ -105,9 +105,7 @@ parseLet = do
     name <- parseName
     an <- M.optional $ do
         symbol ":"
-        st <- parseStage
-        ty <- parseExpr
-        pure (ty, st)
+        parseStagedExpr
     symbol "="
     arg <- parseExpr
     symbol ";"

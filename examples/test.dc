@@ -1,4 +1,9 @@
-(n : [int]) -> [int]
+let id : (a : type) -> (x : a) -> a =
+    fn a => fn x => x;
+
+--(id ^(int)) ^(3)
+^3
+
 
 -- if 0 then 2 else 1
 

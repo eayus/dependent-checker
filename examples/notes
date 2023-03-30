@@ -1,0 +1,29 @@
+Consider this program:
+
+    let id : (a : type) -> (x : a) -> a =
+        fn a => fn x => x;
+
+    (id ^(int)) ^(3)
+
+
+For this to typecheck, 
+    ^3 must have type ^int
+
+
+Under the naive "run" rule, 
+    ^3 : int 
+which is not ok because
+    ^int != int
+
+
+We cannot make ^int evaluate to int, because that would break stage preservation when reducing.
+    - i.e.   3  : int @ const
+    - i.e.   ^3 : int @ runtime
+
+
+Maybe the "run" rule has to be:
+    x : t @ const
+    -------------
+    ^x : ^t @ runtime
+
+???
