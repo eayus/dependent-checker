@@ -22,7 +22,7 @@ infer ctx (Snd x)      = inferSnd ctx x
 infer ctx (Ano x t)    = inferAno ctx x t
 infer ctx Type         = pure (VType, Constant)
 infer ctx (Const c)    = pure (inferConst c, Constant)
-infer ctx (Run x)      = inferRun ctx x
+infer ctx (Run n x)    = inferRun ctx n x
 infer ctx (If b t f)   = inferIf ctx b t f
 infer ctx (Add x y)    = inferAddSub ctx x y
 infer ctx (Sub x y)    = inferAddSub ctx x y
@@ -108,10 +108,13 @@ inferSnd ctx x = infer ctx x >>= \case
     _ -> Left "Cannot project term not of sigma type"
 
 
-inferRun :: Context vars frees -> Expr vars -> Either String (Value frees, Stage)
-inferRun ctx x = do
+inferRun :: Context vars frees -> Int -> Expr vars -> Either String (Value frees, Stage)
+inferRun ctx i x = do
     (t, n) <- infer ctx x
-    pure (t, nextStage n)
+    let n' = nextStage n
+    pure $ case i of
+        0 -> (t, n')
+        _ -> (VRun (i - 1) t, n')
 
 
 inferIf :: Context vars frees -> Expr vars -> Expr vars -> Expr vars -> Either String (Value frees, Stage)

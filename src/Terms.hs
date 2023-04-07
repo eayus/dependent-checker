@@ -19,7 +19,7 @@ data Expr (vars :: Nat)
     | Ano (Expr vars) (Expr vars)
     | Type
     | Const Const
-    | Run (Expr vars)
+    | Run Int (Expr vars)
     | If (Expr vars) (Expr vars) (Expr vars)
     | Add (Expr vars) (Expr vars)
     | Sub (Expr vars) (Expr vars)

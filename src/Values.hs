@@ -20,7 +20,7 @@ data Value (vars :: Nat)
     | VSnd (Value vars)
     | VType
     | VConst Const
-    | VRun (Value vars)
+    | VRun Int (Value vars)
     | VIf (Value vars) (Value vars) (Value vars)
     | VAdd (Value vars) (Value vars)
     | VSub (Value vars) (Value vars)

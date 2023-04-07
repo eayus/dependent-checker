@@ -114,8 +114,9 @@ parseLet = do
 
 parseRun :: Parser vars (Expr vars)
 parseRun = do
-    symbol "^"
-    Run <$> parseExpr
+    ups <- M.some $ symbol "^"
+    let n = Prelude.length ups - 1
+    Run n <$> parseExpr
 
 parseIf :: Parser vars (Expr vars)
 parseIf = do
