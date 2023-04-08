@@ -7,6 +7,7 @@ import Terms
 import Values
 import Eval
 import Control.Monad (unless)
+import Weaken (weakenValue)
 
 
 infer :: Context vars frees -> Expr vars -> Either String (Value frees, Stage)
@@ -26,11 +27,13 @@ infer ctx (Run n x)    = inferRun ctx n x
 infer ctx (If b t f)   = inferIf ctx b t f
 infer ctx (Add x y)    = inferAddSub ctx x y
 infer ctx (Sub x y)    = inferAddSub ctx x y
+infer ctx (Fix x)      = Left "Cannot infer fix"
 
 
 check :: Context vars frees -> Expr vars -> Value frees -> Maybe Stage -> Either String Stage
 check ctx (Lam x)    exp n = checkLam ctx x exp n
 check ctx (Pair x y) exp n = checkPair ctx x y exp n
+check ctx (Fix x)    exp n = checkFix ctx x exp n
 check ctx expr    expected  n = do
     (actual, m) <- infer ctx expr
     let expected' = reify (frees ctx) expected
@@ -38,7 +41,7 @@ check ctx expr    expected  n = do
     unless (expected' == actual') (Left $ "Type mismatch: " ++ show expected' ++ "\n" ++ show actual')
 
     case n of
-        Just n | n /= m -> Left "Stage mismatch"
+        Just n | n /= m -> Left $ "Stage mismatch for:\n" ++ show expr ++ "\nExpected " ++ show n ++ " but got " ++ show m
         _ -> pure m
 
 
@@ -56,6 +59,14 @@ checkPair ctx x y (VSigma t u) l = do
     m <- check ctx y (force u (eval (values ctx) x)) l
     pure (n <> m)
 checkPair ctx x y _ l = Left "Pair must have sigma type"
+
+
+checkFix :: Context vars frees -> Expr (S vars) -> Value frees -> Maybe Stage -> Either String Stage
+checkFix ctx body ty Nothing = Left "Fix must know stage"
+checkFix ctx body ty (Just n) = do
+    let ctx' = extendFree ty n ctx
+    check ctx' body (weakenValue ty) (Just n)
+    pure n
 
 
 inferApp :: Context vars frees -> Expr vars -> Expr vars -> Either String (Value frees, Stage)

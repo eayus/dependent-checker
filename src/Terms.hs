@@ -23,6 +23,7 @@ data Expr (vars :: Nat)
     | If (Expr vars) (Expr vars) (Expr vars)
     | Add (Expr vars) (Expr vars)
     | Sub (Expr vars) (Expr vars)
+    | Fix (Expr (S vars))
     deriving (Eq, Show)
 
 

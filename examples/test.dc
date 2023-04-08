@@ -1,4 +1,15 @@
-let id : (a : type) -> (x : a) -> a =
+let add : [(n : int) -> [(m : int) -> int]] =
+    fix rec => fn n => fn m =>
+        if n
+            then ^{1} + rec (n - ^{1}) m
+            else m
+;
+
+add ^{3} ^{4}
+
+
+/-let id : (a : type) -> (x : a) -> a =
     fn a => fn x => x;
 
 (id ^(int)) ^^(3)
+-/

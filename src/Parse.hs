@@ -116,7 +116,7 @@ parseRun :: Parser vars (Expr vars)
 parseRun = do
     ups <- M.some $ symbol "^"
     let n = Prelude.length ups - 1
-    Run n <$> parseExpr
+    Run n <$> M.between (symbol "{") (symbol "}") parseExpr
 
 parseIf :: Parser vars (Expr vars)
 parseIf = do
@@ -140,9 +140,17 @@ constants =
 parseLit :: Parser vars (Expr vars)
 parseLit = Const . IntLit <$> lexeme L.decimal
 
+parseFix :: Parser vars (Expr vars)
+parseFix = do
+    symbol "fix"
+    name <- parseName
+    symbol "=>"
+    Fix <$> extend name parseExpr
+    
+
 parseExpr''' :: Parser vars (Expr vars)
 parseExpr''' = M.choice $ map M.try
-    [ parseSubExpr, parseLit, parseConstant, parseLam, parsePi, parseLet, parseVar, parseRun, parseIf ]
+    [ parseSubExpr, parseFix, parseLit, parseConstant, parseLam, parsePi, parseLet, parseVar, parseRun, parseIf ]
 
 parseExpr'' :: Parser vars (Expr vars)
 parseExpr'' = foldl1 App <$> M.some parseExpr'''

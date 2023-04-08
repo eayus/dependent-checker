@@ -6,6 +6,7 @@ import Data.Vect
 import Terms
 import Values
 import Weaken
+import Control.Monad.Fix (fix)
 
 
 -- Expressions are evaluated in an environment to their values.
@@ -27,6 +28,7 @@ eval env (Run n x)    = VRun n (eval env x)
 eval env (If b t f)   = doIf (eval env b) (eval env t) (eval env f)
 eval env (Add x y)    = doAdd (eval env x) (eval env y)
 eval env (Sub x y)    = doSub (eval env x) (eval env y)
+eval env (Fix x)      = fix $ \res -> eval (Cons res env) x
 
 
 -- Try to apply closures if possible..
@@ -48,16 +50,19 @@ projectSnd e           = VSnd e
 
 doIf :: Value vars -> Value vars -> Value vars -> Value vars
 doIf (VConst (IntLit n)) t f = if n > 0 then t else f
+doIf (VRun _ (VConst (IntLit n))) t f = if n > 0 then t else f
 doIf b t f = VIf b t f
 
 
 doAdd :: Value vars -> Value vars -> Value vars
 doAdd (VConst (IntLit n)) (VConst (IntLit m)) = VConst (IntLit (n + m))
+doAdd (VRun i (VConst (IntLit n))) (VRun _ (VConst (IntLit m))) = VRun i $ VConst (IntLit (n + m))
 doAdd n m = VAdd n m
 
 
 doSub :: Value vars -> Value vars -> Value vars
 doSub (VConst (IntLit n)) (VConst (IntLit m)) = VConst (IntLit (n - m))
+doSub (VRun i (VConst (IntLit n))) (VRun _ (VConst (IntLit m))) = VRun i $ VConst (IntLit (n - m))
 doSub n m = VSub n m
 
 
