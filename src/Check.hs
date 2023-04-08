@@ -111,10 +111,9 @@ inferSnd ctx x = infer ctx x >>= \case
 inferRun :: Context vars frees -> Int -> Expr vars -> Either String (Value frees, Stage)
 inferRun ctx i x = do
     (t, n) <- infer ctx x
-    let n' = nextStage n
     pure $ case i of
-        0 -> (t, n')
-        _ -> (VRun (i - 1) t, n')
+        0 -> (t, Runtime)
+        _ -> (VRun (i - 1) t, Runtime)
 
 
 inferIf :: Context vars frees -> Expr vars -> Expr vars -> Expr vars -> Either String (Value frees, Stage)

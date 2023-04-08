@@ -44,7 +44,3 @@ data Stage
 instance Semigroup Stage where
     Constant <> Constant = Constant
     _ <> _ = Runtime
-
-
-nextStage :: Stage -> Stage
-nextStage _  = Runtime
