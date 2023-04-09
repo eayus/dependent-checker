@@ -99,6 +99,26 @@ parsePi = do
     (to, m) <- extend name parseStagedExpr
     pure $ Pi from n to m
 
+parseSigma :: Parser vars (Expr vars)
+parseSigma = do
+    symbol "["
+    name <- parseName
+    symbol ":"
+    from <- parseExpr
+    symbol "|"
+    to <- extend name parseExpr
+    symbol "]"
+    pure $ Sigma from to 
+
+parsePair :: Parser vars (Expr vars)
+parsePair = do
+    symbol "["
+    x <- parseExpr
+    symbol ","
+    y <- parseExpr
+    symbol "]"
+    pure $ Pair x y
+
 parseLet :: Parser vars (Expr vars)
 parseLet = do
     symbol "let"
@@ -152,7 +172,7 @@ parseFix = do
 
 parseExpr''' :: Parser vars (Expr vars)
 parseExpr''' = M.choice $ map M.try
-    [ parseSubExpr, parseFix, parseLit, parseConstant, parseLam, parsePi, parseLet, parseVar, parseRun, parseIf ]
+    [ parseSubExpr, parseSigma, parsePair, parseFix, parseLit, parseConstant, parseLam, parsePi, parseLet, parseVar, parseRun, parseIf ]
 
 parseExpr'' :: Parser vars (Expr vars)
 parseExpr'' = foldl1 App <$> M.some parseExpr'''

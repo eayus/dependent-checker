@@ -1,11 +1,11 @@
 let vect : (a : type) -> (n : int) -> type =
-    fix rec => fn n => fn m =>
-        id n
-            then _
-            else _
+    fix rec => fn a => fn n =>
+        if n
+            then [ fst : a | ^{unit} ]
+            else ^{unit}
 ;
 
-
+vect ^{unit} ^{1}
 
 
 
