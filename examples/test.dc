@@ -1,11 +1,34 @@
 let vect : (a : type) -> (n : int) -> type =
     fix rec => fn a => fn n =>
         if n
-            then [ fst : a | ^{unit} ]
+            then [ fst : a | rec a (n - ^{1}) ]
             else ^{unit}
 ;
 
-vect ^{unit} ^{1}
+let list : (a : type) -> type = fn a => [ n : int | vect a n ];
+
+
+let xs : list ^{int}  = [ ^{2} , [ ^^{1}, [ ^^{2}, ^^{it} ] ] ];
+
+let either : (a : type) -> (b : type) -> type =
+    fn a => fn b =>
+        [ tag : int | if tag then b else a ]
+;
+
+
+let ex : either ^{int} ^{unit} = [ ^{0}, ^^{3} ];
+
+
+
+let product : (ts : list ^{type}) -> type =
+    fn ts => ^{type}
+;
+
+let sop : type = list (list ^{type});
+
+ex
+
+
 
 
 

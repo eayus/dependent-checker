@@ -15,8 +15,8 @@ infer ctx (Var lvl)    = pure (level lvl (types ctx), level lvl (stages ctx))
 infer ctx (App x y)    = inferApp ctx x y
 infer ctx (Lam x)      = Left "Can't infer lam"
 infer ctx (Let t x y)  = inferLet ctx t x y
-infer ctx (Pi x n y m) = inferPi ctx x y
-infer ctx (Sigma x y)  = inferPi ctx x y
+infer ctx (Pi x n y m) = inferPi ctx x n y m
+infer ctx (Sigma x y)  = inferPi ctx x Runtime y Runtime
 infer ctx (Pair x y)   = Left "Can't infer pair"
 infer ctx (Fst x)      = inferFst ctx x
 infer ctx (Snd x)      = inferSnd ctx x
@@ -91,11 +91,11 @@ inferLet ctx (Just (t, n)) arg body = do
     infer (extendBound t' arg' n ctx) body
 
 
-inferPi :: Context vars frees -> Expr vars -> Expr (S vars) -> Either String (Value frees, Stage)
-inferPi ctx from to = do
+inferPi :: Context vars frees -> Expr vars -> Stage -> Expr (S vars) -> Stage -> Either String (Value frees, Stage)
+inferPi ctx from fromS to toS = do
     n <- check ctx from VType Nothing
     let from' = eval (values ctx) from
-    m <- check (extendFree from' n ctx) to VType Nothing
+    m <- check (extendFree from' fromS ctx) to VType Nothing
     pure (VType, n <> m)
 
 
