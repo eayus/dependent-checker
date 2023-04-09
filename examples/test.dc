@@ -5,7 +5,7 @@ let add : [(n : int) -> [(m : int) -> int]] =
             else m
 ;
 
-add ^{3} ^{4}
+add --^{3} ^{4}
 
 
 /-let id : (a : type) -> (x : a) -> a =

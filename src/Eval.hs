@@ -17,7 +17,7 @@ eval = eval' False
 eval' :: Bool -> Env from to -> Expr from -> Value to
 eval' stuck env (Var v)      = level v env
 eval' stuck env (Lam x)      = VLam $ Lazily stuck env x
-eval' stuck env (App x y)    = apply (eval' stuck env x) (eval' stuck env y)
+eval' stuck env (App x y)    = apply stuck (eval' stuck env x) (eval' stuck env y)
 eval' stuck env (Let _ x y)  = eval' stuck env (App (Lam y) x)
 eval' stuck env (Pi x n y m) = VPi (eval' stuck env x) n (Lazily stuck env y) m
 eval' stuck env (Sigma x y)  = VSigma (eval' stuck env x) (Lazily stuck env y)
@@ -31,14 +31,15 @@ eval' stuck env (Run n x)    = VRun n (eval' stuck env x)
 eval' stuck env (If b t f)   = doIf stuck env (eval' stuck env b) t f
 eval' stuck env (Add x y)    = doAdd (eval' stuck env x) (eval' stuck env y)
 eval' stuck env (Sub x y)    = doSub (eval' stuck env x) (eval' stuck env y)
-eval' stuck env (Fix x)      = fix $ \res -> eval' stuck (Cons res env) x
+eval' stuck env (Fix x)      = VFix (Lazily stuck env x) -- fix $ \res -> eval' stuck (Cons res env) x
 
 
 -- Try to apply closures if possible..
 
-apply :: Value vars -> Value vars -> Value vars
-apply (VLam clos) arg = force clos arg
-apply x           y   = VApp x y
+apply :: Bool -> Value vars -> Value vars -> Value vars
+apply stuck (VLam clos) arg = force clos arg
+apply stuck (VFix clos) arg | not stuck = apply stuck (force clos (VFix clos)) arg
+apply stuck x           y   = VApp x y
 
 
 projectFst :: Value vars -> Value vars
