@@ -33,6 +33,8 @@ deriving instance Show (Fin vars)
 data Const
     = Int
     | IntLit Integer
+    | Unit
+    | It
     deriving (Eq, Show)
 
 

@@ -1,11 +1,24 @@
-let add : [(n : int) -> [(m : int) -> int]] =
+let vect : (a : type) -> (n : int) -> type =
+    fix rec => fn n => fn m =>
+        id n
+            then _
+            else _
+;
+
+
+
+
+
+/-let add : [(n : int) -> [(m : int) -> int]] =
     fix rec => fn n => fn m =>
         if n
             then ^{1} + rec (n - ^{1}) m
             else m
 ;
 
-add --^{3} ^{4}
+add ^{3} --^{4}
+
+-/
 
 
 /-let id : (a : type) -> (x : a) -> a =

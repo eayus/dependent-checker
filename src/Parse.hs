@@ -135,6 +135,8 @@ constants :: [(String, Expr vars)]
 constants =
     [ ("type", Type)
     , ("int", Const Int)
+    , ("unit", Const Unit)
+    , ("it", Const It)
     ]
 
 parseLit :: Parser vars (Expr vars)

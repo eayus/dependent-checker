@@ -145,3 +145,5 @@ inferAddSub ctx x y = do
 inferConst :: Const -> Value vars
 inferConst Int        = VType
 inferConst (IntLit _) = VConst Int
+inferConst Unit       = VType
+inferConst It         = VConst Unit
