@@ -24,6 +24,7 @@ data Value (vars :: Nat)
     | VIf (Value vars) (Value vars) (Value vars)
     | VAdd (Value vars) (Value vars)
     | VSub (Value vars) (Value vars)
+    | VFix (Closure vars)
 
 
 -- Environments map one scope to another. They could be interepreted as a

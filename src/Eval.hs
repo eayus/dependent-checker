@@ -94,6 +94,7 @@ reify vars (VRun n x)    = Run n (reify vars x)
 reify vars (VIf b t f)   = If (reify vars b) (reify vars t) (reify vars f)
 reify vars (VAdd x y)    = Add (reify vars x) (reify vars y)
 reify vars (VSub x y)    = Sub (reify vars x) (reify vars y)
+reify vars (VFix x)      = Fix (reifyClosure vars x)
 
 
 reifyClosure :: SNat vars -> Closure vars -> Expr (S vars)

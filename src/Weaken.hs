@@ -31,6 +31,7 @@ weakenValue (VRun n x)    = VRun n (weakenValue x)
 weakenValue (VIf b t f)   = VIf (weakenValue b) (weakenValue t) (weakenValue f) 
 weakenValue (VAdd x y)    = VAdd (weakenValue x) (weakenValue y)
 weakenValue (VSub x y)    = VSub (weakenValue x) (weakenValue y)
+weakenValue (VFix clos)   = VFix $ weakenClosure clos
 
 
 weakenEnv :: Env from to -> Env from (S to)
