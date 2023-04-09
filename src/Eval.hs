@@ -9,26 +9,29 @@ import Weaken
 import Control.Monad.Fix (fix)
 
 
--- Expressions are evaluated in an environment to their values.
+-- Expressions are eval' stuckuated in an environment to their values.
 
 eval :: Env from to -> Expr from -> Value to
-eval env (Var v)      = level v env
-eval env (Lam x)      = VLam $ Lazily env x
-eval env (App x y)    = apply (eval env x) (eval env y)
-eval env (Let _ x y)  = eval env (App (Lam y) x)
-eval env (Pi x n y m) = VPi (eval env x) n (Lazily env y) m
-eval env (Sigma x y)  = VSigma (eval env x) (Lazily env y)
-eval env (Pair x y)   = VPair (eval env x) (eval env y)
-eval env (Fst x)      = projectFst (eval env x)
-eval env (Snd x)      = projectSnd (eval env x)
-eval env (Ano x _)    = eval env x
-eval env Type         = VType
-eval env (Const c)    = VConst c
-eval env (Run n x)    = VRun n (eval env x)
-eval env (If b t f)   = doIf (eval env b) (eval env t) (eval env f)
-eval env (Add x y)    = doAdd (eval env x) (eval env y)
-eval env (Sub x y)    = doSub (eval env x) (eval env y)
-eval env (Fix x)      = fix $ \res -> eval (Cons res env) x
+eval = eval' False
+
+eval' :: Bool -> Env from to -> Expr from -> Value to
+eval' stuck env (Var v)      = level v env
+eval' stuck env (Lam x)      = VLam $ Lazily stuck env x
+eval' stuck env (App x y)    = apply (eval' stuck env x) (eval' stuck env y)
+eval' stuck env (Let _ x y)  = eval' stuck env (App (Lam y) x)
+eval' stuck env (Pi x n y m) = VPi (eval' stuck env x) n (Lazily stuck env y) m
+eval' stuck env (Sigma x y)  = VSigma (eval' stuck env x) (Lazily stuck env y)
+eval' stuck env (Pair x y)   = VPair (eval' stuck env x) (eval' stuck env y)
+eval' stuck env (Fst x)      = projectFst (eval' stuck env x)
+eval' stuck env (Snd x)      = projectSnd (eval' stuck env x)
+eval' stuck env (Ano x _)    = eval' stuck env x
+eval' stuck env Type         = VType
+eval' stuck env (Const c)    = VConst c
+eval' stuck env (Run n x)    = VRun n (eval' stuck env x)
+eval' stuck env (If b t f)   = doIf stuck env (eval' stuck env b) t f
+eval' stuck env (Add x y)    = doAdd (eval' stuck env x) (eval' stuck env y)
+eval' stuck env (Sub x y)    = doSub (eval' stuck env x) (eval' stuck env y)
+eval' stuck env (Fix x)      = fix $ \res -> eval' stuck (Cons res env) x
 
 
 -- Try to apply closures if possible..
@@ -48,10 +51,10 @@ projectSnd (VPair x y) = y
 projectSnd e           = VSnd e
 
 
-doIf :: Value vars -> Value vars -> Value vars -> Value vars
-doIf (VConst (IntLit n)) t f = if n > 0 then t else f
-doIf (VRun _ (VConst (IntLit n))) t f = if n > 0 then t else f
-doIf b t f = VIf b t f
+doIf :: Bool -> Env from to -> Value to -> Expr from -> Expr from -> Value to
+doIf stuck env (VConst (IntLit n)) t f = if n > 0 then eval' stuck env t else eval' stuck env f
+doIf stuck env (VRun _ (VConst (IntLit n))) t f = if n > 0 then eval' stuck env t else eval' stuck env f
+doIf stuck env b t f = VIf b (eval' True env t) (eval' True env f)
 
 
 doAdd :: Value vars -> Value vars -> Value vars
@@ -70,7 +73,7 @@ doSub n m = VSub n m
 -- the required argument.
 
 force :: Closure vars -> Value vars -> Value vars
-force (Lazily env x) arg = eval (Cons arg env) x
+force (Lazily stuck env x) arg = eval' stuck (Cons arg env) x
 
 forceFresh :: SNat vars -> Closure vars -> Value (S vars)
 forceFresh vars clos = force (weakenClosure clos) (VVar (limit vars))
@@ -101,7 +104,7 @@ reifyClosure :: SNat vars -> Closure vars -> Expr (S vars)
 reifyClosure vars clos = reify (SS vars) (forceFresh vars clos)
 
 
--- Normalisation is just the composition of evaluation and reification.
+-- Normalisation is just the composition of eval' stuckuation and reification.
 -- Most of the time when calling this function, 'from' and 'to' will be
 -- the same.
 

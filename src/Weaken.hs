@@ -39,4 +39,4 @@ weakenEnv = fmap weakenValue
 
 
 weakenClosure :: Closure vars -> Closure (S vars)
-weakenClosure (Lazily env x) = Lazily (weakenEnv env) x
+weakenClosure (Lazily stuck env x) = Lazily stuck (weakenEnv env) x

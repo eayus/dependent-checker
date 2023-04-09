@@ -39,4 +39,4 @@ type Env (from :: Nat) (to :: Nat) = Vect from (Value to)
 -- evaluation in the closure.
 
 data Closure :: Nat -> * where
-    Lazily :: Env from vars -> Expr (S from) -> Closure vars
+    Lazily :: Bool -> Env from vars -> Expr (S from) -> Closure vars
